@@ -1,0 +1,42 @@
+# --- Python básico ---
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# --- Entornos virtuales ---
+venv/
+env/
+.venv/
+
+# --- Configuración local y credenciales ---
+.env
+*.env
+
+# --- Configuración de herramientas (Pytest, coverage, etc.) ---
+.pytest_cache/
+.coverage
+htmlcov/
+*.cover
+*.log
+
+# --- Archivos específicos de OSX/Windows ---
+.DS_Store
+Thumbs.db
+
+# --- Archivos de empaquetado Python (opcional) ---
+*.wheel
+*.egg-info/
+
+# --- Configuración IDE (opcional) ---
+.vscode/
+.idea/
+
+# --- AWS Elastic Beanstalk ---
+# (No ignores la carpeta .ebextensions/ ni sus archivos,
+#  pues son necesarios para el despliegue)
