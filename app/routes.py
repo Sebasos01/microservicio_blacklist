@@ -40,7 +40,6 @@ def add_to_blacklist():
 @blacklist_bp.route("/<string:email>", methods=["GET"])
 @require_jwt
 def check_blacklist(email):
-    print(email)
     entry = Blacklist.query.filter_by(email=email).first()
     if not entry:
         return jsonify({"blacklisted": False, "email": email}), 200
@@ -52,3 +51,8 @@ def check_blacklist(email):
         "app_uuid": entry.app_uuid,
         "created_at": entry.created_at.isoformat()
     }), 200
+
+# Nuevo endpoint para health check
+@blacklist_bp.route("/health", methods=["GET"])
+def health_check():
+    return jsonify({"status": "OK"}), 200
