@@ -40,3 +40,5 @@ Thumbs.db
 # --- AWS Elastic Beanstalk ---
 # (No ignores la carpeta .ebextensions/ ni sus archivos,
 #  pues son necesarios para el despliegue)
+
+microservicio_blacklist/
