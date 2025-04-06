@@ -1,1 +1,1 @@
-web: gunicorn --timeout 120 --workers 1 application:application
+web: gunicorn --workers=1 --threads=2 --worker-class=gthread --max-requests=1000 --max-requests-jitter=50 --timeout=120 --preload application:application
