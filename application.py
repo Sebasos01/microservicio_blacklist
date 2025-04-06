@@ -6,4 +6,5 @@ env_config = os.getenv("FLASK_CONFIG", "config.ProductionConfig")
 application = create_app(config_class=env_config)
 
 if __name__ == "__main__":
-    application.run(host="0.0.0.0", port=5000)
+    # Only for local dev/testing
+    application.run(host="0.0.0.0", port=8000)
