@@ -42,3 +42,4 @@ Thumbs.db
 #  pues son necesarios para el despliegue)
 
 microservicio_blacklist/
+*.zip
