@@ -93,7 +93,7 @@ def test_check_blacklist_found(client, valid_token, sample_blacklist_entry):
     assert response.status_code == 200
     data = response.json
     assert data["blacklisted"] == True
-    assert data["email"] != sample_blacklist_entry["email"]
+    assert data["email"] == sample_blacklist_entry["email"]
     assert data["reason"] == sample_blacklist_entry["reason"]
     assert data["app_uuid"] == sample_blacklist_entry["app_uuid"]
     assert "created_at" in data 
