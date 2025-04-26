@@ -11,6 +11,3 @@ class Blacklist(db.Model):
     reason = db.Column(db.String(255))
     ip_address = db.Column(db.String(45))
     created_at = db.Column(db.DateTime, nullable=False, server_default=func.now())
-
-    def __repr__(self):
-        return f"<Blacklist(email='{self.email}', app_uuid='{self.app_uuid}', reason='{self.reason}', ip_address='{self.ip_address}', created_at='{self.created_at}')>"
