@@ -10,4 +10,5 @@ application.wsgi_app = ProxyFix(application.wsgi_app, x_for=1, x_proto=1)
 
 if __name__ == "__main__":
     # Only for local dev/testing
-    application.run(host="0.0.0.0", port=8000)
+    application.debug = True
+    application.run()
