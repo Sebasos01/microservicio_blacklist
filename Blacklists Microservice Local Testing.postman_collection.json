@@ -1,0 +1,118 @@
+{
+	"info": {
+		"_postman_id": "221240dc-5346-4315-b62c-b08e0a6c5b30",
+		"name": "Blacklists Microservice Local Testing",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "18849122",
+		"_collection_link": "https://xdevops-0385.postman.co/workspace/blacklist-microservice~c91fae5a-7e79-4107-884e-9d47dd08e845/collection/18849122-221240dc-5346-4315-b62c-b08e0a6c5b30?action=share&source=collection_link&creator=18849122"
+	},
+	"item": [
+		{
+			"name": "post blacklists​",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{auth_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"email\": \"test@example.com\",\n  \"app_uuid\": \"123e4567-e89b-12d3-a456-426614174000\",\n  \"reason\": \"Probando local\"\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/blacklists/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"blacklists",
+						""
+					]
+				},
+				"description": "### POST /blacklists/\n\nThis endpoint allows the client to add an email to the blacklist along with additional details.\n\n#### Request Body\n\n- email (string, required): The email address to be blacklisted.\n    \n- app_uuid (string, required): The UUID of the application.\n    \n- reason (string, required): The reason for blacklisting the email.\n    \n\n#### Response\n\nThe response is in JSON format with the following schema:\n\n``` json\n{\n  \"data\": {\n    \"app_uuid\": \"\",\n    \"created_at\": \"\",\n    \"email\": \"\",\n    \"id\": 0,\n    \"ip_address\": \"\",\n    \"reason\": \"\"\n  },\n  \"message\": \"\"\n}\n\n ```\n\n- data (object): Contains the details of the blacklisted email.\n    \n    - app_uuid (string): The UUID of the application.\n        \n    - created_at (string): The timestamp of when the email was blacklisted.\n        \n    - email (string): The blacklisted email address.\n        \n    - id (integer): The unique identifier of the blacklisted entry.\n        \n    - ip_address (string): The IP address from which the request was made.\n        \n    - reason (string): The reason for blacklisting the email.\n        \n- message (string): Additional information or status message.\n    \n\n#### Example\n\n``` json\n{\n  \"email\": \"test@example.com\",\n  \"app_uuid\": \"123e4567-e89b-12d3-a456-426614...\",\n  \"reason\": \"Probando local\"\n}\n\n ```"
+			},
+			"response": []
+		},
+		{
+			"name": "get blacklist",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{auth_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://127.0.0.1:8000/blacklists/test@example.com",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"blacklists",
+						"test@example.com"
+					]
+				},
+				"description": "This endpoint sends an HTTP GET request to retrieve the blacklist status for the email address \"[test@example.com](https://mailto:test@example.com)\".\n\n### Request Body\n\nThis request does not contain a request body.\n\n### Response Body\n\n- `app_uuid`: The UUID of the application associated with the email address.\n    \n- `blacklisted`: Indicates whether the email address is blacklisted or not.\n    \n- `created_at`: The timestamp when the email address was added to the blacklist.\n    \n- `email`: The email address being checked for blacklist status.\n    \n- `reason`: The reason for blacklisting the email address.\n    \n\nThe response is in JSON format with a status code of 200 and a content type of application/json."
+			},
+			"response": []
+		},
+		{
+			"name": "health check",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:8000/blacklists/health",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"blacklists",
+						"health"
+					]
+				},
+				"description": "### Get Blacklist Health\n\nThis endpoint retrieves the health status of the blacklists.\n\n#### Request\n\n- Method: GET\n    \n- URL: `http://127.0.0.1:5000/blacklists/health`\n    \n\n#### Response\n\n- Status: 200\n    \n- Content-Type: application/json\n    \n\n``` json\n{\n    \"status\": \"\"\n}\n\n ```"
+			},
+			"response": []
+		}
+	]
+}
