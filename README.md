@@ -141,6 +141,63 @@ docker-compose up -d
 docker-compose down
 ```
 
+## CI/CD Pipeline
+
+El proyecto incluye una pipeline de CI/CD configurada con AWS CodeBuild. La pipeline ejecuta las siguientes etapas:
+
+### Etapas de la Pipeline
+
+1. **Instalación**
+   - Configura Python 3.9 como versión de runtime
+   - Instala dependencias del proyecto
+   - Instala herramientas de testing y calidad de código
+
+2. **Pre-Build**
+   - Ejecuta verificaciones de calidad de código:
+     - Black (formateo de código)
+     - Flake8 (linting)
+     - Isort (ordenamiento de imports)
+     - Mypy (verificación de tipos)
+   - Ejecuta tests unitarios con cobertura
+   - Inicia sesión en Amazon ECR
+
+3. **Build**
+   - Construye la imagen Docker
+   - Etiqueta la imagen con el repositorio ECR
+
+4. **Post-Build**
+   - Sube la imagen Docker a ECR
+
+### Reportes y Artefactos
+
+La pipeline genera y almacena:
+- Reportes de cobertura de código (formato Cobertura)
+- Reportes de tests (formato JUnit XML)
+- Artefactos de build
+
+### Configuración
+
+La pipeline está configurada en el archivo `buildspec.yml` en la raíz del proyecto. Para ejecutar la pipeline localmente:
+
+```bash
+# Instalar CodeBuild CLI
+pip install aws-sam-cli
+
+# Ejecutar build local
+aws codebuild start-build --project-name <nombre-del-proyecto>
+```
+
+### Requisitos de la Pipeline
+
+Para que la pipeline se ejecute correctamente, asegúrate de:
+1. Tener configuradas las variables de entorno necesarias en AWS CodeBuild:
+   - `AWS_DEFAULT_REGION`
+   - `AWS_ACCOUNT_ID`
+   - `IMAGE_REPO_NAME`
+   - `IMAGE_TAG`
+2. Tener los permisos necesarios para acceder a ECR
+3. Mantener una cobertura de tests adecuada (recomendado >80%)
+
 ## Testing
 
 El proyecto incluye una suite completa de pruebas unitarias y de integración.
