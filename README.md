@@ -8,18 +8,19 @@
 5. [Ejecución](#ejecución)
    - [Desarrollo Local](#desarrollo-local)
    - [Producción](#producción)
-6. [Testing](#testing)
+6. [Docker](#docker)
+7. [Testing](#testing)
    - [Configuración del Entorno de Testing](#configuración-del-entorno-de-testing)
    - [Ejecutar Tests](#ejecutar-tests)
    - [Estructura de Tests](#estructura-de-tests)
    - [Fixtures Disponibles](#fixtures-disponibles)
-7. [Desarrollo](#desarrollo)
+8. [Desarrollo](#desarrollo)
    - [Formateo de Código](#formateo-de-código)
    - [Verificación de Tipos](#verificación-de-tipos)
-8. [Estructura del Proyecto](#estructura-del-proyecto)
-9. [API Documentation](#api-documentation)
-10. [Contribución](#contribución)
-11. [Licencia](#licencia)
+9. [Estructura del Proyecto](#estructura-del-proyecto)
+10. [API Documentation](#api-documentation)
+11. [Contribución](#contribución)
+12. [Licencia](#licencia)
 
 Este es un microservicio Flask que maneja una lista negra de correos electrónicos. Permite agregar correos a la lista negra y verificar si un correo está en la lista.
 
@@ -101,6 +102,43 @@ python application.py
 ### Producción
 ```bash
 gunicorn application:application
+```
+
+## Docker
+
+El servicio puede ser ejecutado usando Docker para un despliegue más sencillo y consistente.
+
+### Construir la Imagen
+```bash
+docker build -t blacklist-microservice .
+```
+
+### Ejecutar el Contenedor
+```bash
+docker run -p 5000:5000 blacklist-microservice
+```
+
+### Variables de Entorno
+Puedes configurar el servicio usando variables de entorno al ejecutar el contenedor:
+
+```bash
+docker run -p 5000:5000 \
+  -e FLASK_CONFIG=config.ProductionConfig \
+  -e SECRET_KEY=your_secret_key \
+  -e JWT_STATIC_TOKEN=your_jwt_token \
+  -e DATABASE_URL=postgresql://user:password@host:5432/dbname \
+  blacklist-microservice
+```
+
+### Docker Compose
+Para un despliegue más completo que incluya la base de datos PostgreSQL, puedes usar Docker Compose:
+
+```bash
+# Construir y ejecutar los servicios
+docker-compose up -d
+
+# Detener los servicios
+docker-compose down
 ```
 
 ## Testing
