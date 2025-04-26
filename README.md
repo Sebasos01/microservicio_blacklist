@@ -1,263 +1,278 @@
-# Blacklists Microservice
+# Microservicio Blacklist
 
-## Table of Contents
-1. [Overview](#overview)  
-2. [Part 1: Local Setup & Testing](#part-1-local-setup--testing)  
-   - [Prerequisites](#prerequisites)  
-   - [Installation Steps](#installation-steps)  
-   - [Local Environment Variables](#local-environment-variables)  
-   - [Running the Application Locally](#running-the-application-locally)  
-   - [Testing with Postman](#testing-with-postman)  
-   - [Available Endpoints (Local)](#available-endpoints-local)  
-3. [Part 2: AWS Elastic Beanstalk Deployment](#part-2-aws-elastic-beanstalk-deployment)  
-    - [Setting Up the RDS PostgreSQL Instance](#1-setting-up-the-rds-postgresql-instance)  
-    - [Creating the Database Schema](#2-creating-the-database-schema)  
-    - [Configuring Elastic Beanstalk](#3-configuring-elastic-beanstalk)  
-    - [Deploying the Application to EB (Manual Zip Upload)](#4-deploying-the-application-to-eb-manual-zip-upload)  
-    - [Postman Testing on the EB Environment](#5-postman-testing-on-the-eb-environment)  
+## Tabla de Contenidos
+1. [Características](#características)
+2. [Requisitos](#requisitos)
+3. [Instalación](#instalación)
+4. [Configuración](#configuración)
+5. [Ejecución](#ejecución)
+   - [Desarrollo Local](#desarrollo-local)
+   - [Producción](#producción)
+6. [Testing](#testing)
+   - [Configuración del Entorno de Testing](#configuración-del-entorno-de-testing)
+   - [Ejecutar Tests](#ejecutar-tests)
+   - [Estructura de Tests](#estructura-de-tests)
+   - [Fixtures Disponibles](#fixtures-disponibles)
+7. [Desarrollo](#desarrollo)
+   - [Formateo de Código](#formateo-de-código)
+   - [Verificación de Tipos](#verificación-de-tipos)
+8. [Estructura del Proyecto](#estructura-del-proyecto)
+9. [API Documentation](#api-documentation)
+10. [Contribución](#contribución)
+11. [Licencia](#licencia)
 
----
+Este es un microservicio Flask que maneja una lista negra de correos electrónicos. Permite agregar correos a la lista negra y verificar si un correo está en la lista.
 
-## Overview
-This **Blacklists Microservice** allows you to blacklist emails for a given application (`app_uuid`) and optionally record the reason for blacklisting along with the IP address that performed the request.  
+## Características
 
-The microservice provides:
-- An endpoint to **add** an email to the blacklist.
-- An endpoint to **check** if an email is already blacklisted.
-- A **health check** endpoint to confirm the service is up and running.  
+- API RESTful para gestionar la lista negra
+- Autenticación mediante token JWT estático
+- Validación de datos con Marshmallow
+- Base de datos SQLite/PostgreSQL
+- Endpoints:
+  - POST `/blacklists/` - Agregar correo a la lista negra
+  - GET `/blacklists/<email>` - Verificar si un correo está en la lista negra
+  - GET `/blacklists/health` - Verificar estado del servicio
 
-For now, this document **only covers local setup and testing**. You will find a placeholder for part 2 which will detail the **AWS Elastic Beanstalk** deployment and **PostgreSQL RDS** configuration at a later time.
+## Requisitos
 
----
+- Python 3.7+
+- pip
+- PostgreSQL (opcional, para producción)
 
-## Part 1: Local Setup & Testing
+## Instalación
 
-### Prerequisites
-1. **Python 3.7+** (make sure `python --version` matches or exceeds 3.7).
-2. **pip** (comes bundled with most Python installations).
-3. **Virtualenv** or the ability to create Python virtual environments.
-
-### Installation Steps
-
-1. **Clone or Download** this repository. Inside the project root, you should see the following structure (shortened for clarity):
-
-   ```
-   .
-   ├── app/
-   │   ├── __init__.py
-   │   ├── auth.py
-   │   ├── extensions.py
-   │   ├── models.py
-   │   ├── routes.py
-   │   └── schemas.py
-   ├── application.py
-   ├── config.py
-   ├── requirements.txt
-   └── Blacklists Microservice Local Testing.postman_collection.json
-   ```
-
-2. **Create a virtual environment** (recommended) and activate it.
-
-   ```bash
-   # On macOS/Linux
-   python3 -m venv venv
-   source venv/bin/activate
-   
-   # On Windows
-   python -m venv venv
-   venv\Scripts\activate
-   ```
-
-3. **Install the dependencies**:
-
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-### Local Environment Variables
-By default, the application uses `DevelopmentConfig` from `config.py`. This means:
-- A local SQLite database (`dev.db`) is used unless overridden by an environment variable `DATABASE_URL`.  
-- A static JWT token is used for authorization, defaulting to `mi_token_jwt_estatico`, but you can change it by setting `JWT_STATIC_TOKEN` in your environment.
-
-If you want to customize any environment variables locally, you can create a `.env` file in the project root or export them directly in your shell before running:
-
+1. Clonar el repositorio:
 ```bash
-export FLASK_CONFIG="config.DevelopmentConfig"
-export JWT_STATIC_TOKEN="my_custom_jwt_token_here"
-export DATABASE_URL="sqlite:///my_dev_database.db"
+git clone <repository-url>
+cd microservicio_blacklist
 ```
 
-> **Note**: For local testing, you typically won't need to modify these unless you have specific requirements.
-
-### Running the Application Locally
-After installing dependencies and (optionally) setting your local environment variables, you can run:
-
+2. Crear y activar un entorno virtual:
 ```bash
+python -m venv venv
+# En Windows
+venv\Scripts\activate
+# En Linux/Mac
+source venv/bin/activate
+```
+
+3. Instalar dependencias:
+```bash
+pip install -r requirements.txt
+```
+
+4. Configurar variables de entorno:
+```bash
+# Crear archivo .env
+cp .env.example .env
+# Editar .env con tus configuraciones
+```
+
+## Configuración
+
+El servicio se puede configurar mediante variables de entorno en el archivo `.env`:
+
+```env
+# Environment Configuration
+FLASK_CONFIG=config.DevelopmentConfig
+
+# Application Settings
+SECRET_KEY=your_secret_key
+JWT_STATIC_TOKEN=your_jwt_token
+
+# Database Configuration
+DATABASE_URL=sqlite:///dev.db  # Para desarrollo
+# DATABASE_URL=postgresql://user:password@localhost:5432/blacklist_db  # Para producción
+```
+
+## Ejecución
+
+### Desarrollo Local
+```bash
+# Activar entorno virtual si no está activo
+source venv/bin/activate  # Linux/Mac
+venv\Scripts\activate     # Windows
+
+# Ejecutar aplicación
 python application.py
 ```
 
-This will start the Flask development server at [http://0.0.0.0:8000](http://0.0.0.0:8000).  
-Feel free to open your browser or use a tool like Postman to hit the endpoints.
+### Producción
+```bash
+gunicorn application:application
+```
 
-### Testing with Postman
-A Postman collection is provided in the repo: **`Blacklists Microservice Local Testing.postman_collection.json`**. You can import this collection into Postman to test all the endpoints quickly.
+## Testing
 
-1. **Import** the collection into Postman:
-   - Open Postman, go to **File** -> **Import**.
-   - Select the JSON file named `Blacklists Microservice Local Testing.postman_collection.json`.
+El proyecto incluye una suite completa de pruebas unitarias y de integración.
 
-2. **Set up JWT token in Postman Environment**:
-   - In Postman, create (or use an existing) environment and add a variable, e.g. `jwt_token`.
-   - Set its **Initial Value** and **Current Value** to your JWT token. By default, the microservice expects `mi_token_jwt_estatico` if you haven't changed `JWT_STATIC_TOKEN`.
-   - The requests in the Postman collection will use `Bearer {{auth_token}}` in the **Authorization** header to pass your token.
+### Configuración del Entorno de Testing
 
-3. **Send requests** to the endpoints; the collection has examples for:
-   - **POST** to create a new blacklist entry.
-   - **GET** to check if an email is blacklisted.
-   - **GET** to check health status.
+1. Asegúrate de que el entorno virtual esté activo
+2. Verifica que las dependencias de testing estén instaladas:
+```bash
+pip install pytest pytest-flask pytest-cov
+```
 
-### Available Endpoints (Local)
+### Ejecutar Tests
 
-1. **Health Check**  
-   - **Endpoint**: `GET /blacklists/health`  
-   - **Description**: Simple check to ensure the service is running.  
-   - **Response**:  
-     ```json
-     {
-       "status": "OK"
-     }
-     ```
+#### Ejecutar Todos los Tests
+```bash
+# Desde el directorio raíz del proyecto
+python -m pytest tests/
+```
 
-2. **Add to Blacklist**  
-   - **Endpoint**: `POST /blacklists/`  
-   - **Authorization**: `Bearer {jwt_token}` (Header)  
-   - **JSON Body**:
-     ```json
-     {
-       "email": "test@example.com",
-       "app_uuid": "some-unique-app-id",
-       "reason": "Optional reason"
-     }
-     ```
-   - **Response**:  
-     ```json
-     {
-       "message": "Email agregado a la lista negra",
-       "data": {
-         "id": 1,
-         "email": "test@example.com",
-         "app_uuid": "some-unique-app-id",
-         "reason": "Optional reason",
-         "ip_address": "127.0.0.1",
-         "created_at": "2025-04-06T12:34:56.789Z"
-       }
-     }
-     ```
-     (Status code: `201 Created`)
+#### Ejecutar Tests con Cobertura
+```bash
+# Cobertura básica
+python -m pytest tests/ --cov=app
 
-3. **Check Blacklist**  
-   - **Endpoint**: `GET /blacklists/<string:email>`  
-   - **Authorization**: `Bearer {jwt_token}` (Header)  
-   - **Response (if blacklisted)**:  
-     ```json
-     {
-       "blacklisted": true,
-       "email": "test@example.com",
-       "reason": "Optional reason",
-       "app_uuid": "some-unique-app-id",
-       "created_at": "2025-04-06T12:34:56.789Z"
-     }
-     ```
-   - **Response (if not blacklisted)**:  
-     ```json
-     {
-       "blacklisted": false,
-       "email": "test@example.com"
-     }
-     ```
+# Cobertura con reporte HTML
+python -m pytest tests/ --cov=app --cov-report=html
 
----
+# Cobertura con reporte detallado
+python -m pytest tests/ --cov=app --cov-report=term-missing
+```
 
-## Part 2: AWS Elastic Beanstalk Deployment
+#### Ejecutar Tests Específicos
+```bash
+# Ejecutar un archivo específico
+python -m pytest tests/test_blacklist.py
 
-This section describes how to deploy the **Blacklists Microservice** to an Amazon EC2 instance via Elastic Beanstalk (EB), using a PostgreSQL instance in Amazon RDS. It covers:
+# Ejecutar una clase específica
+python -m pytest tests/test_blacklist.py::TestBlacklistEndpoints
 
----
+# Ejecutar un test específico
+python -m pytest tests/test_blacklist.py::TestBlacklistEndpoints::test_add_to_blacklist
+```
 
-### 1. Setting Up the RDS PostgreSQL Instance
-1. **Go to the RDS console** in your AWS account.
-2. **Create a new database** (Select **PostgreSQL** as the engine).
-3. **Specify the DB instance details**, such as instance class, storage, and username/password.  
-   - **DB name**: This **must match** the environment variable you will configure in Elastic Beanstalk (e.g., `RDS_DB_NAME`).
-   - **Master username**: Will match `RDS_USERNAME`.
-   - **Master password**: Will match `RDS_PASSWORD`.
+#### Opciones Adicionales
+```bash
+# Ejecutar tests con verbosidad aumentada
+python -m pytest tests/ -v
 
-4. After the instance is created, note the following RDS information (you will need these for EB environment variables):
-   - **Endpoint** (e.g. `mydb.xxxxx.us-east-1.rds.amazonaws.com`)
-   - **Port** (default PostgreSQL port is 5432, unless you customized it)
+# Ejecutar tests y mostrar prints
+python -m pytest tests/ -s
 
-5. **Configure inbound rules** in the **RDS security group** to allow the Elastic Beanstalk instance to connect to the PostgreSQL port (5432). Typically, you will:
-   - Add the EC2 security group (the one associated with the EB environment) as an inbound rule for your RDS security group on port 5432.
+# Ejecutar tests y detenerse al primer fallo
+python -m pytest tests/ -x
 
-### 2. Creating the Database Schema
-Once the RDS is up and running, you need to create the schema (i.e., the tables) used by the microservice.
+# Ejecutar tests y mostrar tiempos de ejecución
+python -m pytest tests/ --durations=3
+```
 
-1. **Connect to your RDS** using a PostgreSQL client (e.g., `psql` from a local machine or EC2).
-   ```bash
-   psql --host=YOUR_RDS_ENDPOINT --port=5432 --username=YOUR_RDS_USERNAME --password --dbname=YOUR_RDS_DB_NAME
-   ```
-2. **Verify the database** is accessible:
-   ```sql
-   SELECT version();
-   ```
-3. **(Optional) Create the database** if you have not already done so. If you used the AWS console to specify the DB name, it should already exist. However, if needed:
-   ```sql
-   CREATE DATABASE your_db_name;
-   ```
-4. **Tables will be created automatically** by this microservice on the first run (thanks to `db.create_all()` in the code). You do not need to manually create the `blacklist` table. Once the service runs in your EB environment, it will handle table creation.
+### Estructura de Tests
 
-### 3. Configuring Elastic Beanstalk
+```
+tests/
+├── conftest.py           # Configuración global y fixtures
+├── test_auth.py          # Tests de autenticación
+├── test_blacklist.py     # Tests de endpoints de la API
+├── test_models.py        # Tests del modelo Blacklist
+└── test_schemas.py       # Tests de validación de datos
+```
 
-1. **Go to the Elastic Beanstalk console** in your AWS account.
-2. **Create a new Application** (or use an existing one).
-3. **Create a new Environment** of type **Web server environment**.  
-   - During creation, EB will provision an EC2 instance running a platform (e.g., Python 3.8).
-4. **Set the environment variables** in the EB Configuration:
-   - `FLASK_CONFIG`: `config.ProductionConfig`
-   - `RDS_HOSTNAME`: (Your RDS endpoint, e.g. `mydb.xxxxx.us-east-1.rds.amazonaws.com`)
-   - `RDS_PORT`: `5432` (or your custom port)
-   - `RDS_DB_NAME`: (Your DB name, e.g. `my_eb_db`)
-   - `RDS_USERNAME`: (Your RDS username)
-   - `RDS_PASSWORD`: (Your RDS password)
-   - `JWT_STATIC_TOKEN`: (Your preferred static token, e.g. `my_production_jwt_token`)
-   - Optionally, set any other environment variables such as `SECRET_KEY`.
+### Fixtures Disponibles
 
-### 4. Deploying the Application to EB (Manual Zip Upload)
+- `app`: Instancia de la aplicación Flask configurada para testing
+- `client`: Cliente de prueba para hacer requests a la API
+- `runner`: CliRunner para probar comandos de CLI
+- `valid_token`: Token JWT válido para testing
+- `invalid_token`: Token JWT inválido para testing
+- `sample_blacklist_entry`: Datos de ejemplo para testing
 
-1. **In your local project**, ensure you have a **`Procfile`** at the root (which you already do).  
-   - It typically contains something like:  
-     ```
-     web: gunicorn application:application
-     ```
-2. **Zip the application** contents from the root. Include:
-   - All Python code (`app/`, `application.py`, `config.py`).
-   - `requirements.txt`
-   - `Procfile`
-   - (Optionally) `.ebextensions/` if you have additional configurations.
-3. **Upload the zip** to your EB environment:
-   - In the EB console, go to **Actions** > **Upload and Deploy**.
-   - Select your zipped file, then **Deploy**.
-4. **Wait for the deployment** to finish. EB will:
-   - Install dependencies.
-   - Start the gunicorn server using your `Procfile`.
-5. **Verify** the environment status is **Healthy** on the EB dashboard.
+### Ejemplo de Uso de Fixtures
 
-### 5. Postman Testing on the EB Environment
-Once your EB environment is healthy and running, you can test the endpoints from Postman:
+```python
+def test_example(client, valid_token, sample_blacklist_entry):
+    response = client.post(
+        "/blacklists/",
+        json=sample_blacklist_entry,
+        headers={"Authorization": f"Bearer {valid_token}"}
+    )
+    assert response.status_code == 201
+```
 
-1. **Replace the localhost base URL** in your Postman requests with your EB environment domain.  
-   - For example, if your environment URL is `http://my-blacklists-env.us-east-1.elasticbeanstalk.com`, then:  
-     - `POST /blacklists/` becomes `http://my-blacklists-env.us-east-1.elasticbeanstalk.com/blacklists/`.
-     - `GET /blacklists/<email>` becomes `http://my-blacklists-env.us-east-1.elasticbeanstalk.com/blacklists/test@example.com`.
-2. **Keep using your `Bearer {{jwt_token}}`** in the Authorization header. Make sure the `jwt_token` variable in your Postman environment still matches the `JWT_STATIC_TOKEN` you set on EB.
-3. **Send requests** just like you did locally to confirm everything works with the RDS PostgreSQL backend.
+## Desarrollo
+
+### Formateo de Código
+```bash
+# Formatear código con black
+black .
+
+# Verificar estilo con flake8
+flake8
+
+# Ordenar imports
+isort .
+```
+
+### Verificación de Tipos
+```bash
+mypy .
+```
+
+## Estructura del Proyecto
+
+```
+microservicio_blacklist/
+├── app/
+│   ├── __init__.py
+│   ├── auth.py
+│   ├── extensions.py
+│   ├── models.py
+│   ├── routes.py
+│   ├── schemas.py
+│   └── prod.db
+├── tests/
+│   ├── conftest.py
+│   ├── test_auth.py
+│   ├── test_blacklist.py
+│   ├── test_models.py
+│   └── test_schemas.py
+├── .ebextensions/
+├── application.py
+├── config.py
+├── Procfile
+├── README.md
+└── requirements.txt
+```
+
+## API Documentation
+
+### Agregar a Lista Negra
+```http
+POST /blacklists/
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+    "email": "test@example.com",
+    "app_uuid": "123e4567-e89b-12d3-a456-426614174000",
+    "reason": "Test reason"
+}
+```
+
+### Verificar Lista Negra
+```http
+GET /blacklists/test@example.com
+Authorization: Bearer <token>
+```
+
+### Health Check
+```http
+GET /blacklists/health
+```
+
+## Contribución
+
+1. Fork el repositorio
+2. Crear una rama para tu feature (`git checkout -b feature/AmazingFeature`)
+3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
+5. Abrir un Pull Request
+
+## Licencia
+
+Este proyecto está bajo la Licencia MIT - ver el archivo LICENSE para más detalles.
